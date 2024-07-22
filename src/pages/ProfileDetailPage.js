@@ -1,48 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { apiRequest } from '../services/api';
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { generateProfileDocument } from '../services/documentService';
 
 function ProfileDetailPage() {
-  const [profile, setProfile] = useState(null);
   const { id } = useParams();
-  const navigate = useNavigate();
+  const [documentUrl, setDocumentUrl] = useState(null);
 
-  useEffect(() => {
-    fetchProfile();
-  }, [id]);
-
-  const fetchProfile = async () => {
+  const handleGenerateDocument = async () => {
     try {
-      const data = await apiRequest(`/profiles/${id}`);
-      setProfile(data);
+      const url = await generateProfileDocument(id);
+      setDocumentUrl(url);
     } catch (error) {
-      console.error('Failed to fetch profile', error);
+      alert('Failed to generate document. Please try again.');
     }
   };
-
-  const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this profile?')) {
-      try {
-        await apiRequest(`/profiles/${id}`, 'DELETE');
-        navigate('/profiles');
-      } catch (error) {
-        alert('Failed to delete profile. Please try again.');
-      }
-    }
-  };
-
-  if (!profile) return <div>Loading...</div>;
 
   return (
     <div>
-      <h1>{profile.name}</h1>
-      <p>Industry: {profile.industry}</p>
-      <p>Description: {profile.description}</p>
-      <Link to={`/profiles/${id}/edit`}>Edit Profile</Link>
-      <button onClick={handleDelete}>Delete Profile</button>
+      <button onClick={handleGenerateDocument}>Generate Document</button>
+      {documentUrl && (
+        <a href={documentUrl} target="_blank" rel="noopener noreferrer">
+          Download Generated Document
+        </a>
+      )}
     </div>
   );
 }
 
 export default ProfileDetailPage;
+
+
+
+
+
 
